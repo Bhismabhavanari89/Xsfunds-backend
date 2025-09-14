@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const contactController = require("../controllers/contactController");
-
+const Contact = require("../models/contact");
 // POST /api/contact
 router.post("/", contactController.createContact);
 router.get(process.env.get, async (req, res) => {
