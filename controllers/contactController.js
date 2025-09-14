@@ -22,6 +22,8 @@ exports.createContact = async (req, res) => {
       phone,
       countryCode: "+91",
     });
+    const message = `New contact added:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}`;
+    await sendWhatsAppMessage(message);
     return res.status(201).json({ message: "Contact saved successfully"});
   } catch (err) {
     console.error(err);
