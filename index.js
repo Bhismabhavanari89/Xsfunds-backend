@@ -14,23 +14,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/contact', contactRoutes);
 
-let isDBConnected = false;
-async function connectDB() {
-  if (!isDBConnected) {
+const PORT = process.env.PORT || 3000;
+
+async function startServer() {
+  try {
     await sequelize.authenticate();
     console.log('Database connected...');
     await sequelize.sync();
     console.log('Tables synced');
-    isDBConnected = true;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Error connecting to DB:', err);
+    process.exit(1); // exit if DB connection fails
   }
 }
 
-module.exports = async (req, res) => {
-  try {
-    await connectDB();
-    app(req, res);
-  } catch (err) {
-    console.error('Error connecting to DB:', err);
-    res.status(500).send('Failed to connect to database');
-  }
-};
+startServer();
