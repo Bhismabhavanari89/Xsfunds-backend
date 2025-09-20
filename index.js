@@ -1,36 +1,36 @@
-// index.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-const sequelize = require('./util/db');           // Sequelize instance
-const contactRoutes = require('./routes/contactRoutes');  // Your routes
+const sequelize = require('./util/db');
+const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routes
 app.use('/api/contact', contactRoutes);
 
-// DB connection and sync
-sequelize.authenticate()
-  .then(() => {
+let isDBConnected = false;
+async function connectDB() {
+  if (!isDBConnected) {
+    await sequelize.authenticate();
     console.log('Database connected...');
-    return sequelize.sync();  // Synchronize models (create tables if needed)
-  })
-  .then(() => {
+    await sequelize.sync();
     console.log('Tables synced');
-    // Start server only after DB is ready
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
+    isDBConnected = true;
+  }
+}
+
+module.exports = async (req, res) => {
+  try {
+    await connectDB();
+    app(req, res);
+  } catch (err) {
     console.error('Error connecting to DB:', err);
-  });
+    res.status(500).send('Failed to connect to database');
+  }
+};
