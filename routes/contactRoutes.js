@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const supabase = require('../supabaseClient'); // make sure this exports your initialized supabase client
+const supabase = require('./supabaseClient'); // make sure this exports your initialized supabase client
 
 // POST /api/contact - create new contact entry
 router.post("/", async (req, res) => {
