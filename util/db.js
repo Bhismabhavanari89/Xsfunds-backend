@@ -1,17 +1,23 @@
-const { Sequelize } = require('sequelize');
-const pg = require('pg'); // Import pg explicitly
-require('dotenv').config();
+const { Sequelize } = require("sequelize");
+const pg = require("pg");
+require("dotenv").config();
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,       // Database name
-  process.env.DB_USER,       // Database username
-  process.env.DB_PASSWORD,   // Database password
+  process.env.POSTGRES_DATABASE,
+  process.env.POSTGRES_USER,
+  process.env.POSTGRES_PASSWORD,
   {
-    host: process.env.DB_HOST,    // Hostname
-    port: process.env.DB_PORT || 5432, // Port
-    dialect: 'postgres',            // Use Postgres dialect
-    dialectModule: pg,              // Explicitly set pg module
-    logging: false,                 // Disable SQL logging
+    host: process.env.POSTGRES_HOST,
+    port: 6543,
+    dialect: "postgres",
+    dialectModule: pg,
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
   }
 );
 
