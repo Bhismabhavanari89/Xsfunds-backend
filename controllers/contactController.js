@@ -1,33 +1,38 @@
-const Contact = require("../models/contact");
-const sendWhatsAppMessage = require('../controllers/sendWhatsapp'); 
+const supabase = require("../util/supabaseClient");
 
-// Create a new contact
+// CREATE CONTACT
 exports.createContact = async (req, res) => {
-  const { name, email, phone } = req.body;
+  const { name, email, phone, message } = req.body;
 
-  // Validation
   if (!name || !email || !phone) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-  if (!/^\d{10}$/.test(phone)) {
-    return res.status(400).json({ error: "Phone must be 10 digits" });
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: "Invalid email format" });
+    return res.status(400).json({ error: "Name, email, and phone are required" });
   }
 
-  try {
-    const contact = await Contact.create({
-      name,
-      email,
-      phone,
-      countryCode: "+91",
-    });
-    const message = `New contact added:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}`;
-    await sendWhatsAppMessage(message);
-    return res.status(201).json({ message: "Contact saved successfully"});
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal server error" });
+  const { data, error } = await supabase
+    .from("contacts")
+    .insert([{ name, email, phone, message }]);
+
+  if (error) {
+    console.error("Supabase Insert Error:", error);
+    return res.status(500).json({ error: error.message });
   }
+
+  return res.status(201).json({
+    message: "Contact saved successfully",
+    data
+  });
+};
+
+// GET ALL CONTACTS
+exports.getContacts = async (req, res) => {
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*");
+
+  if (error) {
+    console.error("Supabase Fetch Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.status(200).json(data);
 };
